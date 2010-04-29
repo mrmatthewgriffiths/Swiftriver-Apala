@@ -4,7 +4,7 @@ Options +FollowSymlinks
 RewriteEngine On
 
 # Installation directory
-RewriteBase /
+RewriteBase /WebApp
 
 # Begin Kohana rewrite settings
 # - Forbidden access to these directories

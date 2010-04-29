@@ -64,7 +64,10 @@ class Install
 		    		"<code>database.template.php</code> to work
             from. Please make sure this file is in the <code>application/config/</code> folder.");
 		}
-		
+
+                /*
+                 * APALA - Removed htaccess check as its done in the combined installer
+
 		// load .htaccess file and work with it.
 		if(!file_exists('../.htaccess')){
 		    $form->set_error("load_htaccess_file","<strong>Oops!</strong> I need a file called " .
@@ -82,7 +85,7 @@ class Install
 			"	<li><a href=\"http://support.microsoft.com/kb/308419\">Windows</a></li>" .
 			"</ul>");
 		}
-
+                */
 		if( !is_writable('../application/config')) {
 		    $form->set_error('permission',
 			"<strong>Oops!</strong> Ushahidi is trying to create and/or edit a file called \"" .

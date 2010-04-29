@@ -20,11 +20,11 @@ class ChannelFactory {
         $logger->log("Core::ObjectModel::ObjectFactories::ChannelFactory::CreateChannel [Constructing Channel object]", \PEAR_LOG_DEBUG);
 
         $channel = new \Swiftriver\Core\ObjectModel\Channel();
-        $channel->id = $data->id;
+        $channel->id = isset($data->id) ? $data->id : null;
         $channel->type = $data->type;
         $channel->updatePeriod = $data->updatePeriod;
-        $channel->active = $data->active;
-        $channel->lastSucess = $data->lastSucess;
+        $channel->active = isset($data->active) ? $data->active : true;
+        $channel->lastSucess = isset($data->lastSucess) ? $data->lastSucess : null;
 
         $params = array();
         foreach($data->parameters as $key => $value) {

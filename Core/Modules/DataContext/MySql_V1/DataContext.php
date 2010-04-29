@@ -691,11 +691,16 @@ class DataContext implements \Swiftriver\Core\DAL\DataContextInterfaces\IDataCon
 
         $logger->log("Core::Modules::DataContext::MySQL_V1::DataContext::GetPagedContentByState [START: Get total record count for state: $state]", \PEAR_LOG_DEBUG);
 
-        //get the total count to return
-        $totalCount = RedBeanController::DataBaseAdapter()->getCell(
-                "select count(id) from content where state = :state",
-                array(":state" => $state));
-
+        try {
+            //get the total count to return
+            $totalCount = RedBeanController::DataBaseAdapter()->getCell(
+                    "select count(id) from content where state = :state",
+                    array(":state" => $state));
+        }
+        catch (\Exception $e) {
+            //no content defined yet
+            return array();
+        }
         //set the return as an int
         $totalCount = (int) $totalCount;
 

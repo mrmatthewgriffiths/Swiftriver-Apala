@@ -603,33 +603,46 @@ This is the index function called by default.
 
 		$numItems_per_page =  Kohana::config('settings.items_per_page');
 		
-		/** New API Calls here. */
-		
-		$service = new ServiceWrapper("http://local.swiftcore.com/ServiceAPI/ContentServices/GetPagedContentByState.php");
-    $params = json_encode(array("state" => "new_content", "pagestart" => ($page_no-1)*$numItems_per_page, "pagesize" => $numItems_per_page));
-    $json = $service->MakePOSTRequest(array("key" => "test", "data" => $params), 5);
-    //echo($json);
-    $return = json_decode($json);		
-    
-    $Feedlist = array();
-    foreach($return->contentitems as $content)
-		{ 
-        $feed = new GenericClass() ;
-				$feed->item_source = $content->source->name; // $content->source->id;
-				$feed->sourceid = $content->source->id ;
-				 $feed->category_id = 5 ; //REMEBER to remove this hard coded category ID.
-				 $feed->weight =	($content->source->score ? $content->source->score : "not yet rated"); 
-				 $feed->id = $content->id;
-				 // echo $content->state ;echo "<br/>";
-				 $feed->item_date = date("c", $content->date);
-				 $feed->item_link = $content->link ;
-				 //echo $content->text[0]->languageCode;echo "<br/>";
-				 $feed->item_title = $content->text[0]->title;
-				 $feed->item_description = $content->text[0]->text[0];
-				 $feed->tags = $content->tags;
-				 	
-				 $Feedlist[] = $feed;  	
-        
+
+                $coreFolder = DOCROOT . "/../Core/";
+                $coreSetupFile = $coreFolder."Setup.php";
+                $workflowFile = $coreFolder."Workflows/GetPagedContentByState.php";
+                $workflowData = json_encode(array("state" => "new_content", "pagestart" => ($page_no-1)*$numItems_per_page, "pagesize" => $numItems_per_page));
+                include_once($coreSetupFile);
+                $workflow = new \Swiftriver\Core\Workflows\ContentServices\GetPagedContentByState();
+                $json = $workflow->RunWorkflow($workflowData, "swiftriver_apala");
+                $return = json_decode($json);
+
+                /* APALA - removed in favor of calls to the file
+                $docroot = DOCROOT;
+                $service = new ServiceWrapper("http://local.apala.com/Core/ServiceAPI/ContentServices/GetPagedContentByState.php");
+                $params = json_encode(array("state" => "new_content", "pagestart" => ($page_no-1)*$numItems_per_page, "pagesize" => $numItems_per_page));
+                $json = $service->MakePOSTRequest(array("key" => "swiftriver_apala", "data" => $params), 5);
+                //echo($json);
+                $return = json_decode($json);
+                */
+
+                $Feedlist = array();
+                if(isset($return->contentitems)) {
+                    foreach($return->contentitems as $content)
+                                {
+                                    $feed = new GenericClass() ;
+                                    $feed->item_source = $content->source->name; // $content->source->id;
+                                    $feed->sourceid = $content->source->id ;
+                                     $feed->category_id = 5 ; //REMEBER to remove this hard coded category ID.
+                                     $feed->weight =	($content->source->score ? $content->source->score : "not yet rated");
+                                     $feed->id = $content->id;
+                                     // echo $content->state ;echo "<br/>";
+                                     $feed->item_date = date("c", $content->date);
+                                     $feed->item_link = $content->link ;
+                                     //echo $content->text[0]->languageCode;echo "<br/>";
+                                     $feed->item_title = $content->text[0]->title;
+                                     $feed->item_description = $content->text[0]->text[0];
+                                     $feed->tags = $content->tags;
+
+                                     $Feedlist[] = $feed;
+
+        }
     }
        
 				
@@ -638,7 +651,7 @@ This is the index function called by default.
 				'uri_segment' => 'page',
 				'items_per_page' => (int) $numItems_per_page,
 				'style' => 'digg',
-				'total_items' => $return->totalcount // number of feed items
+				'total_items' => isset($return->totalcount) ? $return->totalcount : 0 // number of feed items
 				));
 
 		
@@ -649,7 +662,7 @@ This is the index function called by default.
 					
 			  // Get Summary
         // XXX: Might need to replace magic no. 8 with a constant
-        $this->template->content->feedcounts = $return->totalcount;        
+        $this->template->content->feedcounts = isset($return->totalcount) ? $return->totalcount : 0;
         
         $feed_summary_sql = " SELECT f.feed_name as feed_name ,f.feed_url as feed_url ,count(fi.id) as total 
 															FROM `feed` f ,feed_item fi 

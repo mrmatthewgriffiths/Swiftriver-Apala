@@ -5,7 +5,8 @@
     //check if swift is installed?.
     if( $install->is_ushahidi_installed())
     {
-        header('Location:../');
+        //APALA - changed location to tow back
+        header('Location:../../');
     }
    
     $header = $install->_include_html_header();

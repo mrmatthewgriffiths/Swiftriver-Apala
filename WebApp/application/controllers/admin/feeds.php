@@ -19,7 +19,7 @@
 class Feeds_Controller extends Admin_Controller
 {
 
-	private $API_URL = "http://local.swiftcore.com/ServiceAPI/ChannelProcessingJobServices/";
+	private $API_URL = "http://local.apala.com/Core/ServiceAPI/ChannelProcessingJobServices/";
 		
 	function __construct()
 	{
@@ -27,7 +27,7 @@ class Feeds_Controller extends Admin_Controller
 
 	//	$this->template->this_page = 'Add Feeds';
 		//$this->template->content->form_saved = false;
-		
+        }
 
 
 	
@@ -77,12 +77,22 @@ class Feeds_Controller extends Admin_Controller
 /** #########  Apala required changes ##########	
 		These categories and feeds tables should get info from API line 74 and 78.
 */
-		$categories = ORM::factory('category')->where('category_visible = 1')->orderby('id')->find_all();								
-     $service = new ServiceWrapper($this->API_URL."ListAllChannelProcessingJobs.php");
-  $json = $service->MakePOSTRequest(array("key" => "test"), 5);
-    $return = json_decode($json);
-  $channels = $return->channels;
-		
+		$categories = ORM::factory('category')->where('category_visible = 1')->orderby('id')->find_all();
+
+                $coreFolder = DOCROOT . "/../Core/";
+                $coreSetupFile = $coreFolder."Setup.php";
+                include_once($coreSetupFile);
+                $workflow = new \Swiftriver\Core\Workflows\ChannelProcessingJobs\ListAllChannelProcessingJobs();
+                $json = $workflow->RunWorkflow("swiftriver_apala");
+                $return = json_decode($json);
+                $channels = $return->channels;
+
+                /* APALA - Dropped in favor of the file call
+                $service = new ServiceWrapper($this->API_URL."ListAllChannelProcessingJobs.php");
+                $json = $service->MakePOSTRequest(array("key" => "test"), 5);
+                $return = json_decode($json);
+                $channels = $return->channels;
+		*/
 		
 		foreach($categories as $cat)
 		{
@@ -220,24 +230,41 @@ class Feeds_Controller extends Admin_Controller
 	// STEP 2: SAVE Feed
 	private function _save_feed($feed_url,$feed_category,$updatePeriod,$weight)
 	{
-				if(isset($feed_url) &&  !empty($feed_url) && $feed_url != '' && $feed_category > 0 )
-				{
-						/** #########  Apala required changes ########## DB Call below Feed_Model */
-						
-							//'.$_POST["updatePeriod"].'
-						$json = '{"type":"RSS",'.
-                    '"updatePeriod":"'.$updatePeriod.'",'. 
-                    '"parameters":{"feedUrl":"'.$feed_url.'"}}';
-            $service = new ServiceWrapper($this->API_URL."RegisterNewProcessingJob.php");
-            $service->MakePOSTRequest(array("key" => "test", "data" => $json), 5);															
-				}
+            if(isset($feed_url) &&  !empty($feed_url) && $feed_url != '' && $feed_category > 0 )
+            {
+                $json = '{"type":"RSS",'.
+                         '"updatePeriod":"'.$updatePeriod.'",'.
+                         '"parameters":{'.
+                            '"feedUrl":"'.$feed_url.'"'.
+                         '}}';
+                $coreFolder = DOCROOT . "/../Core/";
+                $coreSetupFile = $coreFolder."Setup.php";
+                include_once($coreSetupFile);
+                $workflow = new Swiftriver\Core\Workflows\ChannelProcessingJobs\RegisterNewProcessingJob();
+                $workflow->RunWorkflow($json, "swiftriver_apala");
+
+                /* APALA - Dropped in favor of file call
+                $service = new ServiceWrapper($this->API_URL."RegisterNewProcessingJob.php");
+                $service->MakePOSTRequest(array("key" => "test", "data" => $json), 5);
+                */
+            }
 	}
 	
 	public function Removefeed($channelId)
 	{
-			$service = new ServiceWrapper($this->API_URL."RemoveChannelProcessingJob.php");
-    	$json = $service->MakePOSTRequest(array("key" => "test", "data" => '{"id":"'.$channelId.'"}'), 5);
-			url::redirect("/admin/feeds");
+                $coreFolder = DOCROOT . "/../Core/";
+                $coreSetupFile = $coreFolder."Setup.php";
+                include_once($coreSetupFile);
+                $workflow = new \Swiftriver\Core\Workflows\ChannelProcessingJobs\RemoveChannelProcessingJob();
+                $json = '{"id":"'.$channelId.'"}';
+                $workflow->RunWorkflow($json, "swiftriver_apala");
+                url::redirect("/admin/feeds");
+                
+                /* APALA - Removed infavor of file call
+                $service = new ServiceWrapper($this->API_URL."RemoveChannelProcessingJob.php");
+                $json = $service->MakePOSTRequest(array("key" => "test", "data" => '{"id":"'.$channelId.'"}'), 5);
+                url::redirect("/admin/feeds");
+                */
 	}
 	
 }

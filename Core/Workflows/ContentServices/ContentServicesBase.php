@@ -33,6 +33,14 @@ class ContentServicesBase extends \Swiftriver\Core\Workflows\WorkflowBase {
         return array("state" => $state, "pagesize" => $pagesize, "pagestart" => $pagestart);
     }
 
+    public function ParseJSONToPagedContentByStateAndSourceVeracityParameters($json) {
+        //use the ParseJSONToPagedContentByState method
+        $params = $this->ParseJSONToPagedContentByStateParameters($json);
+        $params["minVeracity"] = $this->ParseJSONToMinVeracity($json);
+        $params["maxVeracity"] = $this->ParseJSONToMaxVeracity($json);
+        return $params;
+    }
+
     public function ParseContentToJSON($content) {
         if(!isset($content) || !is_array($content) || count($content) < 1) {
             return "[]";
@@ -116,6 +124,72 @@ class ContentServicesBase extends \Swiftriver\Core\Workflows\WorkflowBase {
 
         //return the id
         return $id;
+    }
+
+    public function ParseJSONToMinVeracity($json) {
+        $logger = \Swiftriver\Core\Setup::GetLogger();
+        $logger->log("Core::ServiceAPI::ContentServices::ContentServicesBase::ParseJSONToMinVeracity [Method invoked]", \PEAR_LOG_DEBUG);
+
+        $logger->log("Core::ServiceAPI::ContentServices::ContentServicesBase::ParseJSONToMinVeracity [START: Decoding the JSON]", \PEAR_LOG_DEBUG);
+
+        //call json decode on the json
+        $object = json_decode($json);
+
+        //check that the decode worked ok
+        if(!$object || $object == null) {
+            $logger->log("Core::ServiceAPI::ContentServices::ContentServicesBase::ParseJSONToMinVeracity [The JSON did not decode correctly]", \PEAR_LOG_ERR);
+            throw new \InvalidArgumentException("The JSON supplied did not descode.");
+        }
+
+        $logger->log("Core::ServiceAPI::ContentServices::ContentServicesBase::ParseJSONToMinVeracity [END: Decoding the JSON]", \PEAR_LOG_DEBUG);
+
+        $logger->log("Core::ServiceAPI::ContentServices::ContentServicesBase::ParseJSONToMinVeracity [START: Extracting required data]", \PEAR_LOG_DEBUG);
+
+        $minVeracity = (int) $object->minVeracity;
+
+        if(!is_numeric($minVeracity)) {
+            $logger->log("Core::ServiceAPI::ContentServices::ContentServicesBase::ParseJSONToMinVeracity [The JSON did not conatin the required field 'minVeracity']", \PEAR_LOG_ERR);
+            throw new \InvalidArgumentException("The JSON supplied did not containt the required string field 'minVeracity'.");
+        }
+
+        $logger->log("Core::ServiceAPI::ContentServices::ContentServicesBase::ParseJSONToMinVeracity [END: Extracting required data]", \PEAR_LOG_DEBUG);
+
+        $logger->log("Core::ServiceAPI::ContentServices::ContentServicesBase::ParseJSONToMinVeracity [Method finished]", \PEAR_LOG_DEBUG);
+
+        return $minVeracity;
+    }
+
+    public function ParseJSONToMaxVeracity($json) {
+        $logger = \Swiftriver\Core\Setup::GetLogger();
+        $logger->log("Core::ServiceAPI::ContentServices::ContentServicesBase::ParseJSONTomaxVeracity [Method invoked]", \PEAR_LOG_DEBUG);
+
+        $logger->log("Core::ServiceAPI::ContentServices::ContentServicesBase::ParseJSONTomaxVeracity [START: Decoding the JSON]", \PEAR_LOG_DEBUG);
+
+        //call json decode on the json
+        $object = json_decode($json);
+
+        //check that the decode worked ok
+        if(!$object || $object == null) {
+            $logger->log("Core::ServiceAPI::ContentServices::ContentServicesBase::ParseJSONTomaxVeracity [The JSON did not decode correctly]", \PEAR_LOG_ERR);
+            throw new \InvalidArgumentException("The JSON supplied did not descode.");
+        }
+
+        $logger->log("Core::ServiceAPI::ContentServices::ContentServicesBase::ParseJSONTomaxVeracity [END: Decoding the JSON]", \PEAR_LOG_DEBUG);
+
+        $logger->log("Core::ServiceAPI::ContentServices::ContentServicesBase::ParseJSONTomaxVeracity [START: Extracting required data]", \PEAR_LOG_DEBUG);
+
+        $maxVeracity = (int) $object->maxVeracity;
+
+        if(!$maxVeracity || !isset($maxVeracity) || $maxVeracity == null || !is_numeric($maxVeracity)) {
+            $logger->log("Core::ServiceAPI::ContentServices::ContentServicesBase::ParseJSONTomaxVeracity [The JSON did not conatin the required field 'maxVeracity']", \PEAR_LOG_ERR);
+            throw new \InvalidArgumentException("The JSON supplied did not containt the required string field 'maxVeracity'.");
+        }
+
+        $logger->log("Core::ServiceAPI::ContentServices::ContentServicesBase::ParseJSONTomaxVeracity [END: Extracting required data]", \PEAR_LOG_DEBUG);
+
+        $logger->log("Core::ServiceAPI::ContentServices::ContentServicesBase::ParseJSONTomaxVeracity [Method finished]", \PEAR_LOG_DEBUG);
+
+        return $maxVeracity;
     }
 
     public function ParseJSONToInacurateReason($json) {

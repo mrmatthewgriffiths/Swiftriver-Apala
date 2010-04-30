@@ -126,7 +126,7 @@ class Main_Controller extends Template_Controller {
             ));
         $uri = url_Core::base();
         $uri = str_replace("WebApp/", "", $uri);
-        @fopen($uri."/Core/ServiceAPI/ChannelProcessingJobServices/RunNextProcessingJob.php", 'rb', false, $context);
+        //@fopen($uri."/Core/ServiceAPI/ChannelProcessingJobServices/RunNextProcessingJob.php", 'rb', false, $context);
 
 
         // Load cache
@@ -626,14 +626,34 @@ This is the index function called by default.
 			}
 
 		$numItems_per_page =  Kohana::config('settings.items_per_page');
-		
+
+
+
 
                 $coreFolder = DOCROOT . "/../Core/";
                 $coreSetupFile = $coreFolder."Setup.php";
-                $workflowFile = $coreFolder."Workflows/GetPagedContentByState.php";
-                $workflowData = json_encode(array("state" => "new_content", "pagestart" => ($page_no-1)*$numItems_per_page, "pagesize" => $numItems_per_page));
                 include_once($coreSetupFile);
-                $workflow = new \Swiftriver\Core\Workflows\ContentServices\GetPagedContentByState();
+                if(isset($_SESSION['veracity_min']) && isset($_SESSION['veracity_max'])) {
+                    $workflowData = json_encode(
+                            array(
+                                "state" => "new_content",
+                                "pagestart" => ($page_no-1)*$numItems_per_page,
+                                "pagesize" => $numItems_per_page,
+                                "minVeracity" => $_SESSION['veracity_min'],
+                                "maxVeracity" => $_SESSION['veracity_max']
+                            )
+                    );
+                    $workflow = new Swiftriver\Core\Workflows\ContentServices\GetPagedContentByStateAndSourceVeracity();
+                }else {
+                    $workflowData = json_encode(
+                            array(
+                                "state" => "new_content",
+                                "pagestart" => ($page_no-1)*$numItems_per_page,
+                                "pagesize" => $numItems_per_page
+                            )
+                    );
+                    $workflow = new \Swiftriver\Core\Workflows\ContentServices\GetPagedContentByState();
+                }
                 $json = $workflow->RunWorkflow($workflowData, "swiftriver_apala");
                 $return = json_decode($json);
 

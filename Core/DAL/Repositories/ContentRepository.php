@@ -84,5 +84,27 @@ class ContentRepository {
         $logger->log("Core::DAL::Repositories::ContentRepository::GetPagedContentByState [Method finished]", \PEAR_LOG_DEBUG);
         return $content;
     }
+
+    /**
+     * Given the correct parameters, this method will reatun a page of content
+     * in the correct state for whome the source of that content has a veracity
+     * score in between the $minVeracity and $maxVeracity supplied.
+     *
+     * @param int $state
+     * @param int $pagesize
+     * @param int $pagestart
+     * @param int $minVeracity 0 - 100
+     * @param int $maxVeracity 0 - 100
+     * @param string $orderby
+     * @return array("totalCount" => int, "contentItems" => Content[])
+     */
+    public function GetPagedContentByStateAndSourceVeracity($state, $pagesize, $pagestart, $minVeracity, $maxVeracity, $orderby = null) {
+        $logger = \Swiftriver\Core\Setup::GetLogger();
+        $logger->log("Core::DAL::Repositories::ContentRepository::GetPagedContentByStateAndSourceVeracity [Method invoked]", \PEAR_LOG_DEBUG);
+        $dc = new $this->dataContext();
+        $content = $dc::GetPagedContentByStateAndSourceVeracity($state, $pagesize, $pagestart, $minVeracity, $maxVeracity, $orderby);
+        $logger->log("Core::DAL::Repositories::ContentRepository::GetPagedContentByStateAndSourceVeracity [Method finished]", \PEAR_LOG_DEBUG);
+        return $content;
+    }
 }
 ?>

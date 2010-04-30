@@ -52,7 +52,7 @@
 								?>
 							</ul>
 							<!-- / category filters -->
-					<div class="cat-filters clearingfix" style="Text-align:center;padding:20px;background: #CCCCCC;" >
+                                                        <div class="cat-filters clearingfix" style="Text-align:center;padding:20px;background: #CCCCCC;" onmouseup="$('veracitysubmit').click();">
 							<form method="POST" name="veracityfrm" id="veracityfrm" action="<?php echo url::base().'main/veracity/'.$selected_category ; ?>" >
 
 					<H5>VERACITY SLIDER</H5>		 
@@ -63,7 +63,12 @@
 					<input type="image" src="<?php echo url::base() ;?>media/img/submit_btn.png" name="veracitysubmit" id="veracitysubmit" value="Submit" title="Filter feeds by veracity."/>
 									
 							</form>
-					</div>		
+					</div>
+                                                        <script type="text/javascript" language="javascript">
+                                                            $(document).ready(function(){
+
+                                                            });
+                                                        </script>
 							
 							<br />
 						

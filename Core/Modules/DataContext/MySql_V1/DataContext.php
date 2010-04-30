@@ -477,6 +477,7 @@ class DataContext implements \Swiftriver\Core\DAL\DataContextInterfaces\IDataCon
                     $source,
                     array(
                         "textId" => "id",
+                        "score" => "score",
                     ));
 
             //add the encoded source object to the data sotre object
@@ -733,6 +734,93 @@ class DataContext implements \Swiftriver\Core\DAL\DataContextInterfaces\IDataCon
         $logger->log("Core::Modules::DataContext::MySQL_V1::DataContext::GetPagedContentByState [END: Getting the content for the ids]", \PEAR_LOG_DEBUG);
 
         $logger->log("Core::Modules::DataContext::MySQL_V1::DataContext::GetPagedContentByState [Method finished]", \PEAR_LOG_DEBUG);
+
+        return array ("totalCount" => $totalCount, "contentItems" => $content);
+    }
+
+    /**
+     * Given the correct parameters, this method will reatun a page of content
+     * in the correct state for whome the source of that content has a veracity
+     * score in between the $minVeracity and $maxVeracity supplied.
+     *
+     * @param int $state
+     * @param int $pagesize
+     * @param int $pagestart
+     * @param int $minVeracity 0 - 100
+     * @param int $maxVeracity 0 - 100
+     * @param string $orderby
+     * @return array("totalCount" => int, "contentItems" => Content[])
+     */
+    public static function GetPagedContentByStateAndSourceVeracity($state, $pagesize, $pagestart, $minVeracity, $maxVeracity, $orderby = null) {
+        $logger = \Swiftriver\Core\Setup::GetLogger();
+        $logger->log("Core::Modules::DataContext::MySQL_V1::DataContext::GetPagedContentByStateAndSourceVeracity [Method invoked]", \PEAR_LOG_DEBUG);
+
+        //if no $orderby is sent
+        if(!$orderby || $orderby == null) {
+            $logger->log("Core::Modules::DataContext::MySQL_V1::DataContext::GetPagedContentByStateAndSourceVeracity [No Order By clause set, setting to 'date desc']", \PEAR_LOG_DEBUG);
+            //Set it to the default - date DESC
+            $orderby = "date desc";
+        }
+
+        //initilise the red bean controller
+        $rb = RedBeanController::RedBean();
+
+        $logger->log("Core::Modules::DataContext::MySQL_V1::DataContext::GetPagedContentByStateAndSourceVeracity [START: Get total record count for state: $state]", \PEAR_LOG_DEBUG);
+
+        try {
+            //get the total count to return
+            $sql =
+                    "select count(content.id) from content left join content_source ".
+                    "on content.id = content_source.content_id left join source ".
+                    "on content_source.source_id = source.id where state = :state ".
+                    "and ((source.score > :min and source.score < :max) or source.score ".
+                    ($minVeracity == 0 ? "is" : "is not")." null)";
+            $totalCount = RedBeanController::DataBaseAdapter()->getCell(
+                    $sql,
+                    array(
+                        ":state" => $state,
+                        ":min" => $minVeracity,
+                        ":max" => $maxVeracity,
+                    ));
+        }
+        catch (\Exception $e) {
+            //no content defined yet
+            $logger->log("Core::Modules::DataContext::MySQL_V1::DataContext::GetPagedContentByStateAndSourceVeracity [No content to return]", \PEAR_LOG_DEBUG);
+            return array();
+        }
+        //set the return as an int
+        $totalCount = (int) $totalCount;
+
+        $logger->log("Core::Modules::DataContext::MySQL_V1::DataContext::GetPagedContentByStateAndSourceVeracity [Total record count = $totalCount]", \PEAR_LOG_DEBUG);
+
+        $logger->log("Core::Modules::DataContext::MySQL_V1::DataContext::GetPagedContentByStateAndSourceVeracity [END: Get total record count for state: $state]", \PEAR_LOG_DEBUG);
+
+        $logger->log("Core::Modules::DataContext::MySQL_V1::DataContext::GetPagedContentByStateAndSourceVeracity [START: Get the id's of the content that should be returned]", \PEAR_LOG_DEBUG);
+
+        //set the SQL
+        $isNullCondition = $minVeracity == 0 ? "is" : "is not";
+        $sql = 
+            "select content.textId from content left join content_source ".
+            "on content.id = content_source.content_id left join source ".
+            "on content_source.source_id = source.id where state = '$state' ".
+            "and ((source.score >= $minVeracity and source.score <= $maxVeracity) ".
+            "or source.score $isNullCondition null)";
+
+        $logger->log("Core::Modules::DataContext::MySQL_V1::DataContext::GetPagedContentByStateAndSourceVeracity [Getting ID's with query: $sql]", \PEAR_LOG_DEBUG);
+
+        //Get the page of IDs
+        $ids = RedBeanController::DataBaseAdapter()->getCol($sql);
+
+        $logger->log("Core::Modules::DataContext::MySQL_V1::DataContext::GetPagedContentByStateAndSourceVeracity [END: Get the id's of the content that should be returned]", \PEAR_LOG_DEBUG);
+
+        $logger->log("Core::Modules::DataContext::MySQL_V1::DataContext::GetPagedContentByStateAndSourceVeracity [START: Getting the content for the ids]", \PEAR_LOG_DEBUG);
+
+        //Get the content items
+        $content = self::GetContent($ids, $orderby);
+
+        $logger->log("Core::Modules::DataContext::MySQL_V1::DataContext::GetPagedContentByStateAndSourceVeracity [END: Getting the content for the ids]", \PEAR_LOG_DEBUG);
+
+        $logger->log("Core::Modules::DataContext::MySQL_V1::DataContext::GetPagedContentByStateAndSourceVeracity [Method finished]", \PEAR_LOG_DEBUG);
 
         return array ("totalCount" => $totalCount, "contentItems" => $content);
     }

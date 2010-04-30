@@ -25,6 +25,7 @@ class ChannelFactory {
         $channel->updatePeriod = $data->updatePeriod;
         $channel->active = isset($data->active) ? $data->active : true;
         $channel->lastSucess = isset($data->lastSucess) ? $data->lastSucess : null;
+        $channel->inprocess = isset($data->inprocess) ? $data->inprocess : false;
 
         $params = array();
         foreach($data->parameters as $key => $value) {

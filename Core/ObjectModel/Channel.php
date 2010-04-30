@@ -36,6 +36,8 @@ class Channel {
 
     public $lastrun;
 
+    public $inprocess;
+
     public $timesrun = 0;
 
     /**

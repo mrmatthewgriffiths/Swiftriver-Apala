@@ -125,6 +125,7 @@ class DataContext implements \Swiftriver\Core\DAL\DataContextInterfaces\IDataCon
                         "textId" => "id",
                         "active" => "active",
                         "nextrun" => "nextrun",
+                        "inprocess" => "inprocess",
                     ));
 
         //add the json encoded channel
@@ -187,7 +188,7 @@ class DataContext implements \Swiftriver\Core\DAL\DataContextInterfaces\IDataCon
         //select the next due processing job
         $c = reset(RedBeanController::Finder()->where(
                 "channelprocessingjobs",
-                "active = 1 order by nextrun asc limit 1"
+                "active = 1 and inprocess = 0 order by nextrun asc limit 1"
                 ));
 
         //check if there is anythign to return
@@ -205,6 +206,7 @@ class DataContext implements \Swiftriver\Core\DAL\DataContextInterfaces\IDataCon
         $channel->nextrun = $nextrun;
         $channel->timesrun = $channel->timesrun + 1;
         $channel->lastrun = time();
+        $channel->inprocess = true;
         
         //Save the channel back to the DB
         DataContext::SaveChannelProgessingJob($channel);
@@ -295,6 +297,8 @@ class DataContext implements \Swiftriver\Core\DAL\DataContextInterfaces\IDataCon
 
         //save the time of this sucess
         $channel->lastSucess = time();
+
+        $channel->inprocess = false;
 
         //Save the channel back to the DB
         DataContext::SaveChannelProgessingJob($channel);
@@ -699,6 +703,7 @@ class DataContext implements \Swiftriver\Core\DAL\DataContextInterfaces\IDataCon
         }
         catch (\Exception $e) {
             //no content defined yet
+            $logger->log("Core::Modules::DataContext::MySQL_V1::DataContext::GetPagedContentByState [No content to return]", \PEAR_LOG_DEBUG);
             return array();
         }
         //set the return as an int

@@ -58,7 +58,7 @@
                 
 				<table class="form-table fields">
                     <tbody>
-                        <tr>
+                        <tr style="display: none;">
                             <th scope="row"><label for="base_path">Base Path</label></th>
                             <td><input type="text" value="<?php print $form->value('base_path') == "" ? $install->_get_base_path($_SERVER["REQUEST_URI"]) : $form->value('base_path'); ?>" size="25" id="base_path" name="base_path"/></td>
                             <td>The location on your server where you placed your Ushahidi files. <strong>We have automatically detected this value, please make sure that it is correct.</strong>
@@ -86,7 +86,7 @@
                             <td><input type="text" value="<?php print $form->value('host') == '' ? 'localhost':$form->value('host'); ?>" size="25" id="host" name="host"/></td>
                             <td>If you are running Ushahidi on your own computer, this will more than likely be "localhost". If you are running Ushahidi from a web server, you'll get your host information from your web hosting provider.</td>
                         </tr>
-                        <tr>
+                        <tr style="display: none;">
                             <th scope="row"><label for="table_prefix">Table Prefix</label></th>
                             <td><input type="text" size="25" value="<?php print $form->value('table_prefix'); ?>" id="table_prefix" name="table_prefix"/></td>
                             <td>Normally you won't change the table prefix.  However, If you want to run multiple Ushahidi installations from a single database you can do that by changing the prefix here.</td>

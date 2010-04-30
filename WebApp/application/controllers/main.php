@@ -106,9 +106,30 @@ class Main_Controller extends Template_Controller {
 		
     public function __construct()
     {
-        parent::__construct();	
+        parent::__construct();
 
-			  // Load cache
+        /*
+         * APALA - Call the core to run the next due processing job
+         */
+        $coreFolder = dirname(__FILE__) . "/../Core/";
+        $apiFile = $coreFolder."ServiceAPI/ChannelProcessingJobServices/RunNextProcessingJob.php";
+        $postData = array("key" => "swiftriver_apala");
+        $content = http_build_query($postData, '', '&');
+        $context = stream_context_create(
+            array(
+                'http' => array(
+                    'method' => 'POST',
+                    'header' => 'Content-type: application/x-www-form-urlencoded;',
+                    'content' => $content,
+                    'timeout' => null
+                ),
+            ));
+        $uri = url_Core::base();
+        $uri = str_replace("WebApp/", "", $uri);
+        @fopen($uri."/Core/ServiceAPI/ChannelProcessingJobServices/RunNextProcessingJob.php", 'rb', false, $context);
+
+
+        // Load cache
         $this->cache = new Cache;
 
 		

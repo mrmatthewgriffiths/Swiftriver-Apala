@@ -106,7 +106,7 @@
                 <div class="message"></div>
                 <div class="action" style="display:none;">
                     <p>Lets move on to checking the kind of directory access I need to work.</p>
-                    <form action="step-rw-checks.php" method="GET">
+                    <form action="step-db-intro.php" method="GET">
                         <input type="submit" value="lets go ..." class="button" />
                     </form>
                 </div>

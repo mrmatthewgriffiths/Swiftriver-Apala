@@ -7,8 +7,6 @@
  * @see http://kohanaphp.com
  */
 
-define("CORE_API_URL", "http://local.apala.com/Core/ServiceAPI/");
-
 /**
  * Define the website environment status. When this flag is set to TRUE, some
  * module demonstration controllers will result in 404 errors. For more information

@@ -3,7 +3,7 @@
     <preProcessingSteps>
         <step
          className="\Swiftriver\PreProcessingSteps\GoogleLanguageServicePreProcessingStep"
-         filePath="/GoogleLanguageDetectionAndTranslationInterface/GoogleLanguageServicePreProcessingStep.php"
+         filePath="/GoogleLanguageServiceInterface/GoogleLanguageServicePreProcessingStep.php"
         />
         <step
          className="\Swiftriver\PreProcessingSteps\TagTheNetPreProcessingStep"

@@ -14,6 +14,7 @@ class RunNextProcessingJob extends ChannelProcessingJobBase {
         $logger->log("Core::ServiceAPI::ChannelProcessingJobs::RunNextProcessingJob::RunWorkflow [START: Setting time out]", \PEAR_LOG_DEBUG);
         
         set_time_limit(300);
+        
         $timeout = ini_get('max_execution_time');
 
         $logger->log("Core::ServiceAPI::ChannelProcessingJobs::RunNextProcessingJob::RunWorkflow [END: Setting time out to $timeout]", \PEAR_LOG_DEBUG);

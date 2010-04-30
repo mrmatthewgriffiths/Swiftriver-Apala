@@ -85,13 +85,19 @@ class MarkContentAsInacurate extends ContentServicesBase {
 
         //if the score is null - not yet rated, then set it
         if(!isset($source->score) || $source->score == null) {
-            $source->score = 50; //baseline of 50%
+            $source->score = 0; //baseline of 0%
+        }
+
+        if($reason == "falsehood") {
+            $decrement = 2;
+        } else {
+            $decrement = 1;
         }
 
         //if the scoure is not already at the maximum
-        if($source->score > 0) {
+        if($source->score > ($decrement - 1)) {
             //increment the score of the source
-            $source->score == $source->score - 1;
+            $source->score = $source->score - $decrement;
         }
 
         //set the scource back to the content
@@ -103,7 +109,7 @@ class MarkContentAsInacurate extends ContentServicesBase {
 
         try {
             //save the content to the repo
-            $repository->SaveContent($content);
+            $repository->SaveContent(array($content));
         }
         catch (\Exception $e) {
             //get the exception message

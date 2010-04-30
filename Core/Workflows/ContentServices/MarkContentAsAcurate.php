@@ -84,13 +84,13 @@ class MarkContentAsAcurate extends ContentServicesBase {
 
         //if the score is null - not yet rated, then set it
         if(!isset($source->score) || $source->score == null) {
-            $source->score = 50; //baseline of 50%
+            $source->score = 0; //baseline of 0%
         }
 
         //if the scoure is not already at the maximum
-        if($source->score < 100) {
+        if($source->score < 99) {
             //increment the score of the source
-            $source->score = $source->score + 1;
+            $source->score = $source->score + 2;
         }
 
         //set the scource back to the content
@@ -102,7 +102,7 @@ class MarkContentAsAcurate extends ContentServicesBase {
 
         try {
             //save the content to the repo
-            $repository->SaveContent($content);
+            $repository->SaveContent(array($content));
         }
         catch (\Exception $e) {
             //get the exception message

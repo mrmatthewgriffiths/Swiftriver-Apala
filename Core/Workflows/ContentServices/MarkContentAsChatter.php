@@ -77,13 +77,32 @@ class MarkContentAsChatter extends ContentServicesBase {
 
         $logger->log("Core::ServiceAPI::ContentServices::MarkContentAsChatter::RunWorkflow [END: Setting the state to acurate]", \PEAR_LOG_DEBUG);
 
-        //Note that with chatter, we do not make any adjustment to the source
+        $logger->log("Core::ServiceAPI::ContentServices::MarkContentAsChatter::RunWorkflow [START: Decrement source score]", \PEAR_LOG_DEBUG);
+
+        //get the source from the content
+        $source = $content->source;
+
+        //if the score is null - not yet rated, then set it
+        if(!isset($source->score) || $source->score == null) {
+            $source->score = 0; //baseline of 0%
+        }
+
+        //if the scoure is not already at the min
+        if($source->score > 1) {
+            //increment the score of the source
+            $source->score = $source->score - 2;
+        }
+
+        //set the scource back to the content
+        $content->source = $source;
+
+        $logger->log("Core::ServiceAPI::ContentServices::MarkContentAsChatter::RunWorkflow [END: Decrement source score]", \PEAR_LOG_DEBUG);
 
         $logger->log("Core::ServiceAPI::ContentServices::MarkContentAsChatter::RunWorkflow [START: Saving the content and source]", \PEAR_LOG_DEBUG);
 
         try {
             //save the content to the repo
-            $repository->SaveContent($content);
+            $repository->SaveContent(array($content));
         }
         catch (\Exception $e) {
             //get the exception message
@@ -95,6 +114,29 @@ class MarkContentAsChatter extends ContentServicesBase {
         }
 
         $logger->log("Core::ServiceAPI::ContentServices::MarkContentAsChatter::RunWorkflow [END: Saving the content and source]", \PEAR_LOG_DEBUG);
+
+        $logger->log("Core::ServiceAPI::ContentServices::MarkContentAsChatter::RunWorkflow [START: Recording the transaction]", \PEAR_LOG_DEBUG);
+
+        try {
+            //get the trust log repo
+            $trustLogRepo = new \Swiftriver\Core\DAL\Repositories\TrustLogRepository();
+
+            //get the source id
+            $sourceId = $content->source->id;
+
+            //record the new entry
+            $trustLogRepo->RecordSourceScoreChange($sourceId, $markerId, -2);
+        }
+        catch (\Exception $e) {
+            //get the exception message
+            $message = $e->getMessage();
+            $logger->log("Core::ServiceAPI::ChannelProcessingJobs::MarkContentAsChatter::RunWorkflow [An exception was thrown]", \PEAR_LOG_DEBUG);
+            $logger->log("Core::ServiceAPI::ChannelProcessingJobs::MarkContentAsChatter::RunWorkflow [$message]", \PEAR_LOG_ERR);
+            $logger->log("Core::ServiceAPI::ChannelProcessingJobs::MarkContentAsChatter::RunWorkflow [Method finished]", \PEAR_LOG_INFO);
+            return parent::FormatErrorMessage("An exception was thrown: $message");
+        }
+
+        $logger->log("Core::ServiceAPI::ContentServices::MarkContentAsChatter::RunWorkflow [END: Recording the transaction]", \PEAR_LOG_DEBUG);
 
         $logger->log("Core::ServiceAPI::ContentServices::MarkContentAsChatter::RunWorkflow [Method finished]", \PEAR_LOG_INFO);
 

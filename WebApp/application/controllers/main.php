@@ -246,11 +246,14 @@ class Main_Controller extends Template_Controller {
     
     public function increment_source_rating($feedid,$sourceid)
     {
-			$this->auto_render=false;
-			$service = new ServiceWrapper($this->API_URL2."MarkContentAsAcurate.php");
-			$this->change_source_rating($feedid,$service);
-			
+        $coreFolder = DOCROOT . "/../Core/";
+        $coreSetupFile = $coreFolder."Setup.php";
+        include_once($coreSetupFile);
+        $workflowData = json_encode(array("id" => $feedid, "markerId" => "swiftriver_apala_marker"));
+        $workflow = new Swiftriver\Core\Workflows\ContentServices\MarkContentAsAcurate();
+        $workflow->RunWorkflow($workflowData, "swiftriver_apala");
     }
+
     public function decrement_source_rating($feedid,$categoryid)
     {
     		$this->auto_render=false;

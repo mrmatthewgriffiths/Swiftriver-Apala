@@ -1,0 +1,8 @@
+.*swp
+*~
+*application/logs/*
+*application/cache/*
+*media/uploads/*
+*application/config/database.php
+*Cache/*
+*nbproject/*
